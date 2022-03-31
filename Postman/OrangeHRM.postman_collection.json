@@ -1,0 +1,1262 @@
+{
+	"info": {
+		"_postman_id": "8869aca1-1caf-4ef5-aff3-fbdc12a8e992",
+		"name": "Orange HRM",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "00 - Pre required",
+			"item": [
+				{
+					"name": "00 - Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"\r",
+									"pm.globals.set(\"access_token\", jsonData.access_token);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"is Succses\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.expires_in).to.eql(3600);\r",
+									"    pm.expect(jsonData.scope).to.eql(\"admin\")\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "client_id",
+									"value": "yubi",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "yubi123",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials",
+									"type": "text"
+								}
+							]
+						},
+						"url": "{{base_url}}/oauth/issueToken"
+					},
+					"response": []
+				},
+				{
+					"name": "01 - Invalid Get Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.error).to.eql(\"unsupported_grant_type\"); }\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "client_id",
+									"value": "yubi",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "yubi1234",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "client_credentials\n",
+									"type": "text"
+								}
+							]
+						},
+						"url": "{{base_url}}/oauth/issueToken"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "01 - Admin",
+			"item": [
+				{
+					"name": "01-001-get user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\"), function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Verify Data\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.data[0].userName).to.eql(\"adityap\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/user?id=102",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "102"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "01-002-login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.userName).to.eql(\"yubihartland\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\" : \"yubihartland\",\r\n    \"password\" : \"Yubihartland_17\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/api/v1/login"
+					},
+					"response": []
+				},
+				{
+					"name": "01-002 - Invalid Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.text).to.eql(\"Credentials Are Wrong Please Try Again\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\" : \"yubihartland\",\r\n    \"password\" : \"Yubihartland_\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/api/v1/login"
+					},
+					"response": []
+				},
+				{
+					"name": "01-003-Get Organization Information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.data[0].city).to.eql(\"serang\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{base_url}}/api/v1/organization"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "02 - Attedance",
+			"item": [
+				{
+					"name": "02-001- Punch In",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.data[0].success).to.eql(\"Successfully Punched In\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\":\"\",\r\n    \"timezone\" :\"Europe/London\",\r\n    \"note\" :\"Punch in note.\",\r\n    \"datetime\" :\"2022-06-22 22:12\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/punch-in",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"punch-in"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "02-003- Invalid Punch Out",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.text).to.eql(\"Invalid Time Zone\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\":\"\",\r\n    \"timezone\" :\"Europe\",\r\n    \"note\" :\"Punch out note.\",\r\n    \"datetime\":\"2028-06-22 22:30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/punch-out",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"punch-out"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "02-002- Punch Out",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.data[0].success).to.eql(\"Successfully Punched Out\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\":\"\",\r\n    \"timezone\" :\"Europe/London\",\r\n    \"note\" :\"Punch out note.\",\r\n    \"datetime\":\"2022-06-22 22:30\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/punch-out",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"punch-out"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "03 - Employee",
+			"item": [
+				{
+					"name": "03-001- Save Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\"), function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.success).to.eql(\"Successfully Saved\");\r",
+									"\r",
+									"    pm.environment.set(\"id_employee\", jsonData.id);\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\" : \"Yubi\",\r\n    \"middleName\" : \"Hartland\",\r\n    \"lastName\"  :  \"Muharam\",\r\n    \"code\"      : \"{{$randomInt}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-002- Employee Detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.firstName).to.eql(\"Yubi\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : \"272\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-003- Update Employee Detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.succsess).to.eql(\"Successfully Updated\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\": \"Yubi\",\r\n    \"middleName\": \"Hartland\",\r\n    \"lastName\": \"Muharam\",\r\n    \"code\": \"{{$randomInt}}\",\r\n    \"employeeId\": \"272\",\r\n    \"fullName\": \"Yubi Hartland Muharam\",\r\n    \"status\": null,\r\n    \"dob\": \"1995-06-17\",\r\n    \"driverLicenseNumber\": \"\",\r\n    \"licenseExpiryDate\": \"2022-03-23\",\r\n    \"maritalStatus\": \"Single\",\r\n    \"gender\": null,\r\n    \"otherId\": \"789\",\r\n    \"nationality\": \"Indonesian\"\r\n}        \r\n       ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-004 - Terminate Employment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.data[0].succsess).to.eql(\"Successfully Terminated\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : \"216\",\r\n    \"date\" :\"2022-03-22\",\r\n    \"reason\" : \"Other\",\r\n    \"note\"  : \"Termination note.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/action/terminate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"action",
+								"terminate"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "216"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-005-Employee Search",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.firstName).to.eql(\"Yubi\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/search?name=Yubi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								"search"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Yubi"
+								},
+								{
+									"key": "id",
+									"value": "216",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-006 - Employee Contact Detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.data[0].id).to.eql(\"162\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/contact-detail",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"contact-detail"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "216"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-007 - Save Employee Contact Detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.data[0].succsess).to.eql(\"Successfully Saved\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\"    : \"272\",\r\n    \"addressStreet1\" : \"Jakarta Pusat\",\r\n    \"addressStreet2\" :  \"Bekasi\",\r\n    \"city\"          :   \"Jakarta\",\r\n    \"state\"        :  \"DKI Jakarta\",\r\n    \"zip\"   : \"1011\",\r\n    \"country\" : \"Indonesia\",\r\n    \"homeTelephone\"   :  \"02221456\",\r\n    \"mobile\"  :     \"08221416177\",\r\n    \"workTelephone\"   : \"02178655\",\r\n    \"workEmail\"     : \"yubi1234@gmail.com\",\r\n    \"otherEmail\"    : \"yubi321@gmail.com\"\r\n\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/contact-detail",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"contact-detail"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-008-Update Employee Contact Detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.succsess).to.eql(\"Successfully Updated\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\"             : \"272\",\r\n    \"addressStreet1\" : \"Jakarta Barat\",\r\n    \"addressStreet2\" :  \"Bekasi\",\r\n    \"city\"          :   \"Jakarta\",\r\n    \"state\"          :  \"DKI Jakarta\",\r\n    \"zip\"           : \"1011\",\r\n    \"country\"       : \"Indonesia\",\r\n    \"homeTelephone\"   :  \"02221456\",\r\n    \"mobile\"    :     \"08221416177\",\r\n    \"workTelephone\"   : \"02178655\",\r\n    \"workEmail\"     : \"yubi123@gmail.com\",\r\n    \"otherEmail\"    : \"yubi543@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/contact-detail",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"contact-detail"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-009- Save Employee Dependents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.succsess).to.eql(\"Successfully Saved\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\"  : \"272\",\r\n    \"name\"  : \"Yubi testlagi Muharam\",\r\n    \"relationship\"  :  \"Single\",\r\n    \"dob\"   : \"1995-06-17\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/dependent\n",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"dependent\n"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-010- Update Employee Dependents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\"), function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.succsess).to.eql(\"Successfully Updated\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\"  : \"272\",\r\n    \"name\"  : \"Yubi Hartland Muharam\",\r\n    \"relationship\"  :  \"Single\",\r\n    \"dob\"   : \"1995-06-17\",\r\n    \"sequenceNumber\"    : \"4\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/dependent",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"dependent"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-011 - Employee Dependents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\"), function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.name).to.eql(\"Yubi Hartland Muharam\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\" : \"272\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/dependent",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"dependent"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-013 - Invalid Delete Employee Dependents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.text).to.eql(\"Sequence Number Is Wrong\"); }\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\"   : \"216\",\r\n    \"sequenceNumber\"    : \"5\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/dependent",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"dependent"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "03-012- Delete Employee Dependents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\"), function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Verify Data\"), function () {\r",
+									"    var jsonData = pm.response.json() ;\r",
+									"    pm.expect(jsonData.succsess).to.eql(\"Successfully Deleted\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\"   : \"272\",\r\n    \"sequenceNumber\"    : \"4\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employee/:id/dependent\n",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"employee",
+								":id",
+								"dependent\n"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "272"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
